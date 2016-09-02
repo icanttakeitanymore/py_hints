@@ -1,23 +1,31 @@
-In [109]: def main(data):
-     ...:     results = {}
-     ...:     for key,values in data.items():
-     ...:         group = grouper(results, key)
-     ...:         next(group)
-     ...:         for value in values:
-     ...:             group.send(value)
-     ...:         group.send(None)
+In [99]: from collections import namedtuple
+
+In [100]: Result = namedtuple('Result', 'count average')
+
+In [101]: # субгенератор
+
+In [102]: def averager():
+     ...:     total = 0.0
+     ...:     count = 0
+     ...:     average = None
+     ...:     while True:
+     ...:         term = yield
+     ...:         if term is None:
+     ...:             break
+     ...:         total += term
+     ...:         count += 1
+     ...:         average = total/count
+     ...:     return Result(count, average)
+     ...: 
+
+In [103]: # Делегирующий генератор
+
+In [104]: def grouper(results, key):
+     ...:     while True:
+     ...:         results[key] = yield from averager()
      ...:         
 
-In [110]: def main(data):
-     ...:     results = {}
-     ...:     for key,values in data.items():
-     ...:         group = grouper(results, key)
-     ...:         next(group)
-     ...:         for value in values:
-     ...:             group.send(value)
-     ...:         group.send(None)
-     ...:         print(results)
-     ...:         
+In [105]: # Клиентский код или вызывающаяя сторо       
 
 In [111]: def main(data):
      ...:     results = {}
